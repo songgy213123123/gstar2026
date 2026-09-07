@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>G-Star 2026 Networking Challenge</title>
+<style>
+  :root{--bg:#0b1020;--card:#121a2d;--muted:#9fb0c7;--text:#f5f7fb;--line:#23314f;--acc:#7cc4ff;--ok:#73d6a0;--bad:#ff8c8c}
+  *{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#09101d,#0b1326);color:var(--text)}
+  .wrap{max-width:980px;margin:0 auto;padding:24px}.hero,.card{background:rgba(18,26,45,.96);border:1px solid var(--line);border-radius:22px}.hero{padding:26px}.card{padding:22px;margin-top:18px}
+  h1,h2,h3,p{margin-top:0}.kicker{letter-spacing:.18em;color:var(--muted);font-weight:700;font-size:12px}.sub{color:var(--muted);line-height:1.6}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{border:1px solid var(--line);border-radius:16px;padding:16px}.stat b{font-size:24px;display:block;margin-top:6px}
+  label{display:block;font-weight:700;font-size:14px;margin-top:14px}input{width:100%;margin-top:7px;padding:14px 15px;border-radius:12px;border:1px solid var(--line);background:#0d1528;color:var(--text);font-size:16px}
+  button{border:0;border-radius:12px;padding:14px 16px;font-weight:800;cursor:pointer;font-size:15px}.primary{background:#dfefff;color:#07101d;width:100%;margin-top:16px}.secondary{background:#18233a;color:var(--text);border:1px solid var(--line)}
+  .msg{min-height:22px;margin-top:10px;font-size:14px}.ok{color:var(--ok)}.bad{color:var(--bad)}.hidden{display:none}.row{display:flex;justify-content:space-between;gap:12px;align-items:center}.rank{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.rank:last-child{border-bottom:0}.rank .n{width:30px;text-align:center;font-weight:900}.rank .name{flex:1}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:8px 10px;margin:4px;color:var(--muted)}
+  .board{padding:28px}.board h1{font-size:44px}.board .rank{font-size:22px;padding:16px 0}.board .rank .n{width:52px;font-size:28px}.board .score{font-size:24px;font-weight:900}
+  @media(max-width:720px){.grid,.stats{grid-template-columns:1fr}.wrap{padding:14px}.hero,.card{border-radius:16px}.board h1{font-size:30px}.board .rank{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="kicker">G-STAR 2026</div>
+    <h1>Networking Challenge</h1>
+    <p class="sub">QR로 접속하고 닉네임과 나만의 키워드를 등록하세요. 다른 참가자와 대화해 키워드를 획득할 때마다 점수가 올라갑니다.</p>
+  </section>
+
+  <section id="join" class="card grid">
+    <div>
+      <div class="kicker">STEP 01</div><h2>게임 참여하기</h2>
+      <form id="joinForm">
+        <label>닉네임<input id="nickname" maxlength="20" placeholder="예: CloudMaster" required></label>
+        <label>나만의 키워드<input id="keyword" maxlength="20" placeholder="예: GEMINI" required></label>
+        <div id="joinMsg" class="msg"></div>
+        <button class="primary">게임 시작</button>
+      </form>
+    </div>
+    <div>
+      <div class="kicker">HOW TO PLAY</div><h2>게임 방법</h2>
+      <p><b>1.</b> QR 스캔 후 닉네임과 키워드 등록</p>
+      <p><b>2.</b> 여러 참가자와 만나 상대의 키워드 확보</p>
+      <p><b>3.</b> 확보한 키워드 입력 시 +1 Point</p>
+      <p><b>4.</b> 실시간 랭킹 1위를 노리세요</p>
+    </div>
+  </section>
+
+  <section id="game" class="hidden">
+    <div class="card stats">
+      <div class="stat"><span class="sub">MY NICKNAME</span><b id="meName">-</b></div>
+      <div class="stat"><span class="sub">MY KEYWORD</span><b id="meKeyword">-</b></div>
+      <div class="stat"><span class="sub">MY SCORE / RANK</span><b><span id="meScore">0</span> PT · <span id="meRank">-</span>위</b></div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="kicker">STEP 02</div><h2>키워드 등록</h2>
+        <form id="collectForm">
+          <label>상대방 키워드<input id="targetKeyword" placeholder="KEYWORD" required></label>
+          <div id="collectMsg" class="msg"></div>
+          <button class="primary">키워드 등록 +1</button>
+        </form>
+        <p class="sub" style="margin-top:16px">테스트 키워드: NEXON / KRAFTON / UNITY / CLOUD / GAME / AI / BUSAN</p>
+      </div>
+      <div class="card">
+        <div class="row"><div><div class="kicker">LIVE</div><h2>Leaderboard</h2></div><button id="boardBtn" class="secondary">전광판 모드</button></div>
+        <div id="leaderboard"></div>
+      </div>
+    </div>
+    <div class="card"><div class="row"><h3>내가 만난 참가자</h3><b><span id="metCount">0</span>명</b></div><div id="metList" class="sub">아직 등록한 키워드가 없습니다.</div></div>
+  </section>
+
+  <section id="board" class="card board hidden">
+    <div class="row"><div><div class="kicker">G-STAR 2026</div><h1>NETWORKING RANKING</h1></div><button id="backBtn" class="secondary">참가자 화면</button></div>
+    <p class="sub">현재 참가자 <b id="playerCount">8</b>명</p>
+    <div id="boardRanks"></div>
+  </section>
+</div>
+<script>
+const players=[
+{nickname:'GameKing',keyword:'NEXON',score:7},{nickname:'BusanHero',keyword:'KRAFTON',score:6},{nickname:'CloudMaster',keyword:'UNITY',score:5},{nickname:'PixelHunter',keyword:'CLOUD',score:4},{nickname:'AIPlayer',keyword:'GAME',score:3},{nickname:'LevelUp',keyword:'AI',score:2},{nickname:'Joystick',keyword:'BUSAN',score:1},{nickname:'QuestMaker',keyword:'METAVERSE',score:0}
+];
+let me=null; const met=new Set();
+const $=id=>document.getElementById(id), norm=s=>String(s||'').trim().toUpperCase();
+function sorted(){return [...players].sort((a,b)=>b.score-a.score||a.nickname.localeCompare(b.nickname));}
+function render(){const s=sorted(); $('leaderboard').innerHTML=s.slice(0,10).map((p,i)=>`<div class="rank"><div class="n">${i+1}</div><div class="name"><b>${p.nickname}${p===me?' · ME':''}</b></div><div><b>${p.score} PT</b></div></div>`).join(''); $('boardRanks').innerHTML=s.slice(0,8).map((p,i)=>`<div class="rank"><div class="n">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div><div class="name"><b>${p.nickname}</b></div><div class="score">${p.score}</div></div>`).join(''); $('playerCount').textContent=players.length; if(me){$('meScore').textContent=me.score;$('meRank').textContent=s.indexOf(me)+1;}}
+function renderMet(){ $('metCount').textContent=met.size; $('metList').innerHTML=met.size?[...met].map(x=>`<span class="pill">✓ ${x}</span>`).join(''):'아직 등록한 키워드가 없습니다.'; }
+$('joinForm').addEventListener('submit',e=>{e.preventDefault();const n=$('nickname').value.trim(),k=norm($('keyword').value),m=$('joinMsg');m.className='msg'; if(n.length<2||k.length<2){m.textContent='닉네임과 키워드를 2자 이상 입력해주세요.';m.classList.add('bad');return} if(players.some(p=>p.nickname.toLowerCase()===n.toLowerCase())){m.textContent='이미 사용 중인 닉네임입니다.';m.classList.add('bad');return} if(players.some(p=>p.keyword===k)){m.textContent='이미 사용 중인 키워드입니다.';m.classList.add('bad');return} me={nickname:n,keyword:k,score:0};players.push(me);$('meName').textContent=n;$('meKeyword').textContent=k;$('join').classList.add('hidden');$('game').classList.remove('hidden');render();renderMet();});
+$('collectForm').addEventListener('submit',e=>{e.preventDefault();const k=norm($('targetKeyword').value),m=$('collectMsg');m.className='msg';if(k===me.keyword){m.textContent='자신의 키워드는 등록할 수 없습니다.';m.classList.add('bad');return} const t=players.find(p=>p.keyword===k);if(!t){m.textContent='❌ 일치하는 키워드가 없습니다.';m.classList.add('bad');return}if(met.has(t.nickname)){m.textContent='이미 만난 참가자입니다.';m.classList.add('bad');return}met.add(t.nickname);me.score++;m.textContent=`🎉 MATCH! ${t.nickname}님 획득 +1 Point`;m.classList.add('ok');$('targetKeyword').value='';render();renderMet();});
+$('boardBtn').addEventListener('click',()=>{$('game').classList.add('hidden');$('board').classList.remove('hidden');render();});
+$('backBtn').addEventListener('click',()=>{$('board').classList.add('hidden');$('game').classList.remove('hidden');});
+render();
+</script>
+</body>
+</html>
